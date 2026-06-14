@@ -6,7 +6,7 @@ import { ShoppingCartIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
-import { isCheckoutHost } from "lib/checkout";
+import { isStorefrontHost } from "lib/checkout";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -258,9 +258,18 @@ function CheckoutButton({ disabled = false }: { disabled?: boolean }) {
     try {
       const checkoutUrl = await getCheckoutUrl();
 
-      if (!checkoutUrl || !isCheckoutHost(new URL(checkoutUrl).hostname)) {
+      if (!checkoutUrl) {
         setError(
           "Checkout nicht verfügbar. Bitte Seite neu laden und erneut versuchen.",
+        );
+        return;
+      }
+
+      const { hostname } = new URL(checkoutUrl);
+
+      if (isStorefrontHost(hostname)) {
+        setError(
+          "Checkout noch nicht konfiguriert. Warte, bis checkout.mint-case.com in Shopify verbunden ist.",
         );
         return;
       }

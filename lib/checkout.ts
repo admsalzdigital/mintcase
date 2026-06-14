@@ -9,11 +9,8 @@ export function getCheckoutHost(): string {
   return CHECKOUT_HOST;
 }
 
-export function isCheckoutHost(hostname: string): boolean {
-  return (
-    hostname === CHECKOUT_HOST ||
-    hostname.endsWith(".myshopify.com")
-  );
+export function isStorefrontHost(hostname: string): boolean {
+  return STOREFRONT_HOSTS.includes(hostname);
 }
 
 /** Send checkout to Shopify's connected domain, never the Vercel storefront. */
@@ -21,11 +18,7 @@ export function resolveCheckoutUrl(checkoutUrl: string): string {
   try {
     const source = new URL(checkoutUrl);
 
-    if (isCheckoutHost(source.hostname)) {
-      return source.toString();
-    }
-
-    if (STOREFRONT_HOSTS.includes(source.hostname)) {
+    if (isStorefrontHost(source.hostname)) {
       return new URL(
         `${source.pathname}${source.search}`,
         `https://${CHECKOUT_HOST}`,
