@@ -6,6 +6,7 @@ import { ShoppingCartIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
+import { isCheckoutHost } from "lib/checkout";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -257,7 +258,7 @@ function CheckoutButton({ disabled = false }: { disabled?: boolean }) {
     try {
       const checkoutUrl = await getCheckoutUrl();
 
-      if (!checkoutUrl?.includes(".myshopify.com")) {
+      if (!checkoutUrl || !isCheckoutHost(new URL(checkoutUrl).hostname)) {
         setError(
           "Checkout nicht verfügbar. Bitte Seite neu laden und erneut versuchen.",
         );
