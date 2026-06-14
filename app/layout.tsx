@@ -6,6 +6,7 @@ import { GeistSans } from "geist/font/sans";
 import { getCart } from "lib/shopify";
 import { baseUrl, getShopifyConfigError } from "lib/utils";
 import { ReactNode } from "react";
+import { headers } from "next/headers";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -28,6 +29,17 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
+  const pathname = (await headers()).get("x-pathname") || "";
+  const isComingSoonPage = pathname.startsWith("/coming-soon");
+
+  if (isComingSoonPage) {
+    return (
+      <html lang="de" className={GeistSans.variable}>
+        <body className="bg-[#0B0B0D] text-white antialiased">{children}</body>
+      </html>
+    );
+  }
+
   const configError = getShopifyConfigError();
 
   if (configError) {
