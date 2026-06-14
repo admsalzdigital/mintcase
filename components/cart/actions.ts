@@ -113,8 +113,12 @@ export async function updateItemQuantity(
 }
 
 export async function redirectToCheckout() {
-  let cart = await getCart();
-  redirect(cart!.checkoutUrl);
+  const cart = await getCart();
+  // Custom-Domain im Checkout-Link durch die funktionierende Shopify-Zentrale ersetzen
+  const checkoutUrl = cart!.checkoutUrl
+    .replace("www.mint-case.com", "ihe0a9-j9.myshopify.com")
+    .replace("mint-case.com", "ihe0a9-j9.myshopify.com");
+  redirect(checkoutUrl);
 }
 
 export async function createCartAndSetCookie() {
