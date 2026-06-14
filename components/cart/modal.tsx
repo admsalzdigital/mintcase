@@ -10,7 +10,8 @@ import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { createCartAndSetCookie, getCheckoutUrl } from "./actions";
+import { useFormStatus } from "react-dom";
+import { createCartAndSetCookie, redirectToCheckout } from "./actions";
 import { useCart } from "./cart-context";
 import { DeleteItemButton } from "./delete-item-button";
 import { EditItemQuantityButton } from "./edit-item-quantity-button";
@@ -245,49 +246,28 @@ function CloseCart({ className }: { className?: string }) {
 }
 
 function CheckoutButton({ disabled = false }: { disabled?: boolean }) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <form action={redirectToCheckout}>
+      <CheckoutSubmitButton disabled={disabled} />
+      {disabled ? (
+        <p className="mt-2 text-center text-xs text-neutral-500">
+          Bitte zuerst ein Produkt in den Warenkorb legen.
+        </p>
+      ) : null}
+    </form>
+  );
+}
 
-  const handleCheckout = async () => {
-    if (disabled) {
-      setError("Bitte zuerst ein Produkt mit Menge 1 in den Warenkorb legen.");
-      return;
-    }
-
-    setPending(true);
-    setError(null);
-
-    try {
-      const checkoutUrl = await getCheckoutUrl();
-
-      if (!checkoutUrl) {
-        setError(
-          "Checkout nicht verfügbar. Seite neu laden und erneut versuchen.",
-        );
-        return;
-      }
-
-      window.location.replace(checkoutUrl);
-    } catch {
-      setError("Checkout fehlgeschlagen. Bitte erneut versuchen.");
-    } finally {
-      setPending(false);
-    }
-  };
+function CheckoutSubmitButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
 
   return (
-    <div>
-      <button
-        className="block w-full rounded-full bg-[#AEE2DB] p-3 text-center text-sm font-semibold text-[#0B0B0D] transition-colors hover:bg-[#8FD4CB] disabled:cursor-not-allowed disabled:opacity-50"
-        type="button"
-        onClick={handleCheckout}
-        disabled={pending || disabled}
-      >
-        {pending ? <LoadingDots className="bg-[#0B0B0D]" /> : "Zur Kasse"}
-      </button>
-      {error ? (
-        <p className="mt-2 text-center text-xs text-red-400">{error}</p>
-      ) : null}
-    </div>
+    <button
+      className="block w-full rounded-full bg-[#AEE2DB] p-3 text-center text-sm font-semibold text-[#0B0B0D] transition-colors hover:bg-[#8FD4CB] disabled:cursor-not-allowed disabled:opacity-50"
+      type="submit"
+      disabled={pending || disabled}
+    >
+      {pending ? <LoadingDots className="bg-[#0B0B0D]" /> : "Zur Kasse"}
+    </button>
   );
 }

@@ -12,6 +12,7 @@ import {
 } from "lib/shopify";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 type AddItemPayload = {
   selectedVariantId: string | undefined;
@@ -131,6 +132,16 @@ export async function getCheckoutUrl(): Promise<string | null> {
   if (!cart?.checkoutUrl || cart.totalQuantity < 1) return null;
 
   return normalizeCheckoutUrl(cart.checkoutUrl);
+}
+
+export async function redirectToCheckout() {
+  const checkoutUrl = await getCheckoutUrl();
+
+  if (!checkoutUrl) {
+    throw new Error("Checkout nicht verfügbar");
+  }
+
+  redirect(checkoutUrl);
 }
 
 export async function createCartAndSetCookie() {
