@@ -92,6 +92,7 @@ export default function CartModal() {
                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
                   <ul className="grow overflow-auto py-4">
                     {cart.lines
+                      .filter((item) => item.quantity > 0)
                       .sort((a, b) =>
                         a.merchandise.product.title.localeCompare(
                           b.merchandise.product.title,
@@ -214,7 +215,12 @@ export default function CartModal() {
                       />
                     </div>
                   </div>
-                  <CheckoutButton />
+                  <CheckoutButton
+                    disabled={
+                      cart.totalQuantity < 1 ||
+                      Number(cart.cost.totalAmount.amount) <= 0
+                    }
+                  />
                 </div>
               )}
             </Dialog.Panel>
@@ -238,29 +244,50 @@ function CloseCart({ className }: { className?: string }) {
   );
 }
 
-function CheckoutButton() {
+function CheckoutButton({ disabled = false }: { disabled?: boolean }) {
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleCheckout = async () => {
+    if (disabled) {
+      setError("Bitte zuerst ein Produkt mit Menge 1 in den Warenkorb legen.");
+      return;
+    }
+
     setPending(true);
+    setError(null);
+
     try {
       const checkoutUrl = await getCheckoutUrl();
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+
+      if (!checkoutUrl) {
+        setError(
+          "Checkout nicht verfügbar. Seite neu laden und erneut versuchen.",
+        );
+        return;
       }
+
+      window.location.replace(checkoutUrl);
+    } catch {
+      setError("Checkout fehlgeschlagen. Bitte erneut versuchen.");
     } finally {
       setPending(false);
     }
   };
 
   return (
-    <button
-      className="block w-full rounded-full bg-[#AEE2DB] p-3 text-center text-sm font-semibold text-[#0B0B0D] transition-colors hover:bg-[#8FD4CB]"
-      type="button"
-      onClick={handleCheckout}
-      disabled={pending}
-    >
-      {pending ? <LoadingDots className="bg-[#0B0B0D]" /> : "Zur Kasse"}
-    </button>
+    <div>
+      <button
+        className="block w-full rounded-full bg-[#AEE2DB] p-3 text-center text-sm font-semibold text-[#0B0B0D] transition-colors hover:bg-[#8FD4CB] disabled:cursor-not-allowed disabled:opacity-50"
+        type="button"
+        onClick={handleCheckout}
+        disabled={pending || disabled}
+      >
+        {pending ? <LoadingDots className="bg-[#0B0B0D]" /> : "Zur Kasse"}
+      </button>
+      {error ? (
+        <p className="mt-2 text-center text-xs text-red-400">{error}</p>
+      ) : null}
+    </div>
   );
 }

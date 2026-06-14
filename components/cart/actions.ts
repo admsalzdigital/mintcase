@@ -1,6 +1,7 @@
 "use server";
 
 import { TAGS } from "lib/constants";
+import { normalizeCheckoutUrl } from "lib/checkout";
 import { getPreOrderCartAttributes } from "lib/pre-order";
 import {
   addToCart,
@@ -17,6 +18,19 @@ type AddItemPayload = {
   isPreOrder: boolean;
 };
 
+async function ensureCartId(): Promise<string> {
+  const cookieStore = await cookies();
+  const existingId = cookieStore.get("cartId")?.value;
+
+  if (existingId) {
+    return existingId;
+  }
+
+  const cart = await createCart();
+  cookieStore.set("cartId", cart.id!);
+  return cart.id!;
+}
+
 export async function addItem(prevState: any, payload: AddItemPayload) {
   const { selectedVariantId, isPreOrder } = payload;
 
@@ -25,6 +39,7 @@ export async function addItem(prevState: any, payload: AddItemPayload) {
   }
 
   try {
+    await ensureCartId();
     await addToCart([
       {
         merchandiseId: selectedVariantId,
@@ -113,12 +128,9 @@ export async function updateItemQuantity(
 
 export async function getCheckoutUrl(): Promise<string | null> {
   const cart = await getCart();
-  if (!cart?.checkoutUrl) return null;
+  if (!cart?.checkoutUrl || cart.totalQuantity < 1) return null;
 
-  // Custom-Domain im Checkout-Link durch die funktionierende Shopify-Zentrale ersetzen
-  return cart.checkoutUrl
-    .replace("www.mint-case.com", "ihe0a9-j9.myshopify.com")
-    .replace("mint-case.com", "ihe0a9-j9.myshopify.com");
+  return normalizeCheckoutUrl(cart.checkoutUrl);
 }
 
 export async function createCartAndSetCookie() {

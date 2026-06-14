@@ -8,7 +8,7 @@ import {
   isPreOrderProduct,
   PRE_ORDER_BUTTON_TEXT,
 } from "lib/pre-order";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState } from "react";
 import { useCart } from "./cart-context";
 
@@ -92,6 +92,7 @@ export function AddToCart({
   const { variants, availableForSale } = product;
   const isPreOrder = isPreOrderProduct(product);
   const { addCartItem } = useCart();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [message, formAction] = useActionState(addItem, null);
 
@@ -117,6 +118,7 @@ export function AddToCart({
           addCartItem(finalVariant, product);
         }
         addItemAction();
+        router.refresh();
       }}
     >
       <SubmitButton
