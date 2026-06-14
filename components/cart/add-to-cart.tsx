@@ -17,20 +17,27 @@ function SubmitButton({
   selectedVariantId,
   isPreOrder,
   compact = false,
+  buttonVariant = "default",
 }: {
   availableForSale: boolean;
   selectedVariantId: string | undefined;
   isPreOrder: boolean;
   compact?: boolean;
+  buttonVariant?: "default" | "landing";
 }) {
   const buttonClasses = clsx(
-    "relative flex w-full items-center justify-center rounded-full bg-blue-600 tracking-wide text-white",
+    "relative flex w-full items-center justify-center rounded-full tracking-wide",
+    buttonVariant === "landing"
+      ? "bg-[#AEE2DB] font-semibold uppercase text-[#0B0B0D] hover:bg-[#8FD4CB]"
+      : "bg-blue-600 text-white",
     compact ? "p-3 text-sm" : "p-4",
   );
   const disabledClasses = "cursor-not-allowed opacity-60 hover:opacity-60";
   const buttonLabel = isPreOrder
     ? PRE_ORDER_BUTTON_TEXT
-    : "In den Warenkorb";
+    : buttonVariant === "landing"
+      ? "In den Warenkorb"
+      : "In den Warenkorb";
 
   if (!availableForSale) {
     return (
@@ -59,12 +66,15 @@ function SubmitButton({
     <button
       aria-label={buttonLabel}
       className={clsx(buttonClasses, {
-        "hover:opacity-90": true,
+        "hover:opacity-90": buttonVariant === "default",
+        "hover:bg-[#8FD4CB]": buttonVariant === "landing",
       })}
     >
-      <div className="absolute left-0 ml-4">
-        <PlusIcon className="h-5" />
-      </div>
+      {buttonVariant === "default" ? (
+        <div className="absolute left-0 ml-4">
+          <PlusIcon className="h-5" />
+        </div>
+      ) : null}
       {buttonLabel}
     </button>
   );
@@ -73,9 +83,11 @@ function SubmitButton({
 export function AddToCart({
   product,
   compact = false,
+  buttonVariant = "default",
 }: {
   product: Product;
   compact?: boolean;
+  buttonVariant?: "default" | "landing";
 }) {
   const { variants, availableForSale } = product;
   const isPreOrder = isPreOrderProduct(product);
@@ -112,6 +124,7 @@ export function AddToCart({
         selectedVariantId={selectedVariantId}
         isPreOrder={isPreOrder}
         compact={compact}
+        buttonVariant={buttonVariant}
       />
       <p aria-live="polite" className="sr-only" role="status">
         {message}

@@ -1,61 +1,51 @@
+import { AnnouncementBar } from "components/landing/announcement-bar";
 import CartModal from "components/cart/modal";
-import LogoSquare from "components/logo-square";
-import { getMenu } from "lib/shopify";
-import { Menu } from "lib/shopify/types";
+import { MintCaseLogo } from "components/mintcase-logo";
 import Link from "next/link";
-import { Suspense } from "react";
-import MobileMenu from "./mobile-menu";
-import Search, { SearchSkeleton } from "./search";
 
-const { SITE_NAME } = process.env;
+const NAV_LINKS = [
+  { label: "Shop", href: "/#product" },
+  { label: "Über uns", href: "/#why" },
+];
 
-export async function Navbar() {
-  const menu = await getMenu("next-js-frontend-header-menu");
-
+export function Navbar() {
   return (
-    <nav className="relative flex items-center justify-between p-4 lg:px-6">
-      <div className="block flex-none md:hidden">
-        <Suspense fallback={null}>
-          <MobileMenu menu={menu} />
-        </Suspense>
-      </div>
-      <div className="flex w-full items-center">
-        <div className="flex w-full md:w-1/3">
-          <Link
-            href="/"
-            prefetch={true}
-            className="mr-2 flex w-full items-center justify-center md:w-auto lg:mr-6"
-          >
-            <LogoSquare />
-            <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">
-              {SITE_NAME}
-            </div>
-          </Link>
-          {menu.length ? (
-            <ul className="hidden gap-6 text-sm md:flex md:items-center">
-              {menu.map((item: Menu) => (
-                <li key={item.title}>
-                  <Link
-                    href={item.path}
-                    prefetch={true}
-                    className="text-neutral-500 underline-offset-4 hover:text-black hover:underline dark:text-neutral-400 dark:hover:text-neutral-300"
-                  >
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+    <header className="sticky top-0 z-50 border-b border-[#2A2A30] bg-[#0B0B0D]/95 backdrop-blur-md">
+      <AnnouncementBar />
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+        <ul className="hidden items-center gap-8 md:flex">
+          {NAV_LINKS.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className="text-sm text-neutral-400 transition-colors hover:text-white"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <MintCaseLogo height={36} priority variant="wordmark" />
         </div>
-        <div className="hidden justify-center md:flex md:w-1/3">
-          <Suspense fallback={<SearchSkeleton />}>
-            <Search />
-          </Suspense>
-        </div>
-        <div className="flex justify-end md:w-1/3">
+
+        <div className="ml-auto flex items-center gap-3 md:ml-0">
+          <ul className="flex items-center gap-4 md:hidden">
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-xs text-neutral-400 transition-colors hover:text-white"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
           <CartModal />
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

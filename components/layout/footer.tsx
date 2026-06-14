@@ -1,76 +1,68 @@
+import { MintCaseLogo } from "components/mintcase-logo";
 import Link from "next/link";
 
-import FooterMenu from "components/layout/footer-menu";
-import LogoSquare from "components/logo-square";
-import { getMenu } from "lib/shopify";
-import { Suspense } from "react";
+const FOOTER_LINKS = {
+  Unternehmen: [
+    { label: "Über uns", href: "/#why" },
+    { label: "Kontakt", href: "/contact" },
+  ],
+  Support: [
+    { label: "FAQ", href: "/faq" },
+    { label: "Rückgabe", href: "/returns" },
+    { label: "Versand", href: "/shipping" },
+  ],
+  Rechtliches: [
+    { label: "AGB", href: "/terms" },
+    { label: "Datenschutz", href: "/privacy" },
+    { label: "Cookies", href: "/cookies" },
+  ],
+};
 
-const { COMPANY_NAME, SITE_NAME } = process.env;
-
-export default async function Footer() {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
-  const copyrightDate = 2023 + (currentYear > 2023 ? `-${currentYear}` : "");
-  const skeleton =
-    "w-full h-6 animate-pulse rounded-sm bg-neutral-200 dark:bg-neutral-700";
-  const menu = await getMenu("next-js-frontend-footer-menu");
-  const copyrightName = COMPANY_NAME || SITE_NAME || "";
 
   return (
-    <footer className="text-sm text-neutral-500 dark:text-neutral-400">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 border-t border-neutral-200 px-6 py-12 text-sm md:flex-row md:gap-12 md:px-4 min-[1320px]:px-0 dark:border-neutral-700">
-        <div>
-          <Link
-            className="flex items-center gap-2 text-black md:pt-1 dark:text-white"
-            href="/"
-          >
-            <LogoSquare size="sm" />
-            <span className="uppercase">{SITE_NAME}</span>
-          </Link>
-        </div>
-        <Suspense
-          fallback={
-            <div className="flex h-[188px] w-[200px] flex-col gap-2">
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
+    <footer className="border-t border-[#2A2A30] bg-[#0B0B0D]">
+      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+          <div className="lg:col-span-2">
+            <MintCaseLogo height={28} variant="wordmark" />
+            <p className="mt-6 max-w-sm text-sm leading-relaxed text-neutral-400">
+              MintCase verändert, wie du Mint dabei hast. Diskret, praktisch und
+              immer griffbereit.
+            </p>
+            <p className="mt-4 text-xs text-neutral-500">
+              Designed in Österreich 🇦🇹
+            </p>
+          </div>
+
+          {Object.entries(FOOTER_LINKS).map(([title, links]) => (
+            <div key={title}>
+              <h3 className="mb-4 text-sm font-medium text-white">{title}</h3>
+              <ul className="space-y-3">
+                {links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-neutral-400 transition-colors hover:text-[#AEE2DB]"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          }
-        >
-          <FooterMenu menu={menu} />
-        </Suspense>
-        <div className="md:ml-auto">
-          <a
-            className="flex h-8 w-max flex-none items-center justify-center rounded-md border border-neutral-200 bg-white text-xs text-black dark:border-neutral-700 dark:bg-black dark:text-white"
-            aria-label="Deploy on Vercel"
-            href="https://vercel.com/templates/next.js/nextjs-commerce"
-          >
-            <span className="px-3">▲</span>
-            <hr className="h-full border-r border-neutral-200 dark:border-neutral-700" />
-            <span className="px-3">Deploy</span>
-          </a>
+          ))}
         </div>
-      </div>
-      <div className="border-t border-neutral-200 py-6 text-sm dark:border-neutral-700">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-1 px-4 md:flex-row md:gap-0 md:px-4 min-[1320px]:px-0">
-          <p>
-            &copy; {copyrightDate} {copyrightName}
-            {copyrightName.length && !copyrightName.endsWith(".")
-              ? "."
-              : ""}{" "}
-            All rights reserved.
-          </p>
-          <hr className="mx-4 hidden h-4 w-[1px] border-l border-neutral-400 md:inline-block" />
-          <p>
-            <a href="https://github.com/vercel/commerce">View the source</a>
-          </p>
-          <p className="md:ml-auto">
-            <a href="https://vercel.com" className="text-black dark:text-white">
-              Created by ▲ Vercel
-            </a>
-          </p>
+
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-6 border-t border-[#2A2A30] pt-8 text-xs text-neutral-500">
+          <span>🚚 Kostenloser Versand ab €50</span>
+          <span>🛡️ 1 Jahr Garantie</span>
+          <span>↩️ 30 Tage Rückgabe</span>
+        </div>
+
+        <div className="mt-8 text-center text-xs text-neutral-500">
+          &copy; {currentYear} MintCase. Alle Rechte vorbehalten.
         </div>
       </div>
     </footer>

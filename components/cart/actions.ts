@@ -22,7 +22,7 @@ export async function addItem(prevState: any, payload: AddItemPayload) {
   const { selectedVariantId, isPreOrder } = payload;
 
   if (!selectedVariantId) {
-    return "Error adding item to cart";
+    return "Bitte wähle zuerst eine Option";
   }
 
   try {
@@ -35,7 +35,7 @@ export async function addItem(prevState: any, payload: AddItemPayload) {
     ]);
     updateTag(TAGS.cart);
   } catch (e) {
-    return "Error adding item to cart";
+    return "Artikel konnte nicht hinzugefügt werden";
   }
 }
 
@@ -44,7 +44,7 @@ export async function removeItem(prevState: any, merchandiseId: string) {
     const cart = await getCart();
 
     if (!cart) {
-      return "Error fetching cart";
+      return "Warenkorb konnte nicht geladen werden";
     }
 
     const lineItem = cart.lines.find(
@@ -55,10 +55,10 @@ export async function removeItem(prevState: any, merchandiseId: string) {
       await removeFromCart([lineItem.id]);
       updateTag(TAGS.cart);
     } else {
-      return "Item not found in cart";
+      return "Artikel nicht im Warenkorb gefunden";
     }
   } catch (e) {
-    return "Error removing item from cart";
+    return "Artikel konnte nicht entfernt werden";
   }
 }
 
@@ -76,7 +76,7 @@ export async function updateItemQuantity(
     const cart = await getCart();
 
     if (!cart) {
-      return "Error fetching cart";
+      return "Warenkorb konnte nicht geladen werden";
     }
 
     const lineItem = cart.lines.find(
@@ -108,7 +108,7 @@ export async function updateItemQuantity(
     updateTag(TAGS.cart);
   } catch (e) {
     console.error(e);
-    return "Error updating item quantity";
+    return "Menge konnte nicht aktualisiert werden";
   }
 }
 

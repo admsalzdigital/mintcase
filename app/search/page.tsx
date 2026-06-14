@@ -4,8 +4,8 @@ import { defaultSort, sorting } from "lib/constants";
 import { getProducts } from "lib/shopify";
 
 export const metadata = {
-  title: "Search",
-  description: "Search for products in the store.",
+  title: "Suche",
+  description: "Produkte im MintCase Shop durchsuchen.",
 };
 
 export default async function SearchPage(props: {
@@ -17,16 +17,18 @@ export default async function SearchPage(props: {
     sorting.find((item) => item.slug === sort) || defaultSort;
 
   const products = await getProducts({ sortKey, reverse, query: searchValue });
-  const resultsText = products.length > 1 ? "results" : "result";
+  const resultsText = products.length === 1 ? "Ergebnis" : "Ergebnisse";
 
   return (
     <>
       {searchValue ? (
-        <p className="mb-4">
+        <p className="mb-4 text-neutral-300">
           {products.length === 0
-            ? "There are no products that match "
-            : `Showing ${products.length} ${resultsText} for `}
-          <span className="font-bold">&quot;{searchValue}&quot;</span>
+            ? "Keine Produkte gefunden für "
+            : `${products.length} ${resultsText} für `}
+          <span className="font-bold text-white">
+            &quot;{searchValue}&quot;
+          </span>
         </p>
       ) : null}
       {products.length > 0 ? (
