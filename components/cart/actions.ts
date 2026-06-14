@@ -11,7 +11,6 @@ import {
 } from "lib/shopify";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 type AddItemPayload = {
   selectedVariantId: string | undefined;
@@ -112,13 +111,14 @@ export async function updateItemQuantity(
   }
 }
 
-export async function redirectToCheckout() {
+export async function getCheckoutUrl(): Promise<string | null> {
   const cart = await getCart();
+  if (!cart?.checkoutUrl) return null;
+
   // Custom-Domain im Checkout-Link durch die funktionierende Shopify-Zentrale ersetzen
-  const checkoutUrl = cart!.checkoutUrl
+  return cart.checkoutUrl
     .replace("www.mint-case.com", "ihe0a9-j9.myshopify.com")
     .replace("mint-case.com", "ihe0a9-j9.myshopify.com");
-  redirect(checkoutUrl);
 }
 
 export async function createCartAndSetCookie() {

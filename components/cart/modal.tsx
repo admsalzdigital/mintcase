@@ -10,8 +10,7 @@ import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
-import { createCartAndSetCookie, redirectToCheckout } from "./actions";
+import { createCartAndSetCookie, getCheckoutUrl } from "./actions";
 import { useCart } from "./cart-context";
 import { DeleteItemButton } from "./delete-item-button";
 import { EditItemQuantityButton } from "./edit-item-quantity-button";
@@ -215,9 +214,7 @@ export default function CartModal() {
                       />
                     </div>
                   </div>
-                  <form action={redirectToCheckout}>
-                    <CheckoutButton />
-                  </form>
+                  <CheckoutButton />
                 </div>
               )}
             </Dialog.Panel>
@@ -242,12 +239,25 @@ function CloseCart({ className }: { className?: string }) {
 }
 
 function CheckoutButton() {
-  const { pending } = useFormStatus();
+  const [pending, setPending] = useState(false);
+
+  const handleCheckout = async () => {
+    setPending(true);
+    try {
+      const checkoutUrl = await getCheckoutUrl();
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      }
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
     <button
       className="block w-full rounded-full bg-[#AEE2DB] p-3 text-center text-sm font-semibold text-[#0B0B0D] transition-colors hover:bg-[#8FD4CB]"
-      type="submit"
+      type="button"
+      onClick={handleCheckout}
       disabled={pending}
     >
       {pending ? <LoadingDots className="bg-[#0B0B0D]" /> : "Zur Kasse"}
