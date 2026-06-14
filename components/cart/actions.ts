@@ -1,6 +1,7 @@
 "use server";
 
 import { TAGS } from "lib/constants";
+import { getPreOrderCartAttributes } from "lib/pre-order";
 import {
   addToCart,
   createCart,
@@ -12,16 +13,26 @@ import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function addItem(
-  prevState: any,
-  selectedVariantId: string | undefined
-) {
+type AddItemPayload = {
+  selectedVariantId: string | undefined;
+  isPreOrder: boolean;
+};
+
+export async function addItem(prevState: any, payload: AddItemPayload) {
+  const { selectedVariantId, isPreOrder } = payload;
+
   if (!selectedVariantId) {
     return "Error adding item to cart";
   }
 
   try {
-    await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
+    await addToCart([
+      {
+        merchandiseId: selectedVariantId,
+        quantity: 1,
+        ...(isPreOrder && { attributes: getPreOrderCartAttributes() }),
+      },
+    ]);
     updateTag(TAGS.cart);
   } catch (e) {
     return "Error adding item to cart";
@@ -56,9 +67,10 @@ export async function updateItemQuantity(
   payload: {
     merchandiseId: string;
     quantity: number;
+    isPreOrder?: boolean;
   }
 ) {
-  const { merchandiseId, quantity } = payload;
+  const { merchandiseId, quantity, isPreOrder = false } = payload;
 
   try {
     const cart = await getCart();
@@ -84,8 +96,13 @@ export async function updateItemQuantity(
         ]);
       }
     } else if (quantity > 0) {
-      // If the item doesn't exist in the cart and quantity > 0, add it
-      await addToCart([{ merchandiseId, quantity }]);
+      await addToCart([
+        {
+          merchandiseId,
+          quantity,
+          ...(isPreOrder && { attributes: getPreOrderCartAttributes() }),
+        },
+      ]);
     }
 
     updateTag(TAGS.cart);

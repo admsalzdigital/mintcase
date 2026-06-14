@@ -33,6 +33,7 @@ import {
 } from "./queries/product";
 import {
   Cart,
+  CartLineInput,
   Collection,
   Connection,
   Image,
@@ -68,6 +69,49 @@ type ExtractVariables<T> = T extends { variables: object }
   ? T["variables"]
   : never;
 
+function isPrivateStorefrontToken(token: string) {
+  return token.startsWith("shpat_");
+}
+
+function getStorefrontAuthHeaders(): HeadersInit {
+  if (isPrivateStorefrontToken(key)) {
+    return {
+      "Shopify-Storefront-Private-Token": key,
+      "Shopify-Storefront-Buyer-IP": "127.0.0.1",
+    };
+  }
+
+  return {
+    "X-Shopify-Storefront-Access-Token": key,
+  };
+}
+
+function formatShopifyFetchError(error: unknown): Error {
+  const shopifyError = error as {
+    message?: string;
+    extensions?: { code?: string };
+  };
+
+  if (
+    shopifyError?.message === "Not Found" ||
+    shopifyError?.extensions?.code === "NOT_FOUND"
+  ) {
+    return new Error(
+      "Shopify Storefront API antwortet mit 'Not Found'. Pruefe SHOPIFY_STORE_DOMAIN (muss deine .myshopify.com-Adresse sein) und den privaten Storefront-Token aus Headless > Storefront API.",
+    );
+  }
+
+  if (typeof shopifyError?.message === "string") {
+    return new Error(`Shopify API Fehler: ${shopifyError.message}`);
+  }
+
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return new Error("Unbekannter Shopify API Fehler.");
+}
+
 export async function shopifyFetch<T>({
   headers,
   query,
@@ -86,7 +130,7 @@ export async function shopifyFetch<T>({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": key,
+        ...(getStorefrontAuthHeaders()),
         ...headers,
       },
       body: JSON.stringify({
@@ -107,18 +151,13 @@ export async function shopifyFetch<T>({
     };
   } catch (e) {
     if (isShopifyError(e)) {
-      throw {
-        cause: e.cause?.toString() || "unknown",
-        status: e.status || 500,
+      throw formatShopifyFetchError({
         message: e.message,
-        query,
-      };
+        extensions: { code: e.status?.toString() },
+      });
     }
 
-    throw {
-      error: e,
-      query,
-    };
+    throw formatShopifyFetchError(e);
   }
 }
 
@@ -225,9 +264,7 @@ export async function createCart(): Promise<Cart> {
   return reshapeCart(res.body.data.cartCreate.cart);
 }
 
-export async function addToCart(
-  lines: { merchandiseId: string; quantity: number }[]
-): Promise<Cart> {
+export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyAddToCartOperation>({
     query: addToCartMutation,
@@ -278,17 +315,21 @@ export async function getCart(): Promise<Cart | undefined> {
     return undefined;
   }
 
-  const res = await shopifyFetch<ShopifyCartOperation>({
-    query: getCartQuery,
-    variables: { cartId },
-  });
+  try {
+    const res = await shopifyFetch<ShopifyCartOperation>({
+      query: getCartQuery,
+      variables: { cartId },
+    });
 
-  // Old carts becomes `null` when you checkout.
-  if (!res.body.data.cart) {
+    // Old carts becomes `null` when you checkout.
+    if (!res.body.data.cart) {
+      return undefined;
+    }
+
+    return reshapeCart(res.body.data.cart);
+  } catch {
     return undefined;
   }
-
-  return reshapeCart(res.body.data.cart);
 }
 
 export async function getCollection(
