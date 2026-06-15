@@ -18,7 +18,7 @@ export default async function OpengraphImage(
 
   const [fontFile, logoFile] = await Promise.all([
     readFile(join(process.cwd(), "./fonts/Inter-Bold.ttf")),
-    readFile(join(process.cwd(), "./public/mintcase-wordmark.png")),
+    readFile(join(process.cwd(), "./public/logo.png")),
   ]);
   const font = Uint8Array.from(fontFile).buffer;
   const logoBase64 = `data:image/png;base64,${logoFile.toString("base64")}`;

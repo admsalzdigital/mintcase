@@ -2,29 +2,25 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 
-const WORDMARK_ASPECT = 1024 / 341;
+const LOGO_SRC = "/logo.png";
+const LOGO_ASPECT = 1629 / 543;
 
 export function MintCaseLogo({
   className,
   height = 36,
   href = "/",
   priority = false,
-  variant = "wordmark",
 }: {
   className?: string;
   height?: number;
   href?: string | null;
   priority?: boolean;
-  variant?: "wordmark" | "full";
 }) {
-  const src =
-    variant === "wordmark" ? "/mintcase-wordmark.png" : "/mintcase-logo.png";
-  const aspect = variant === "wordmark" ? WORDMARK_ASPECT : 1;
-  const width = Math.round(height * aspect);
+  const width = Math.round(height * LOGO_ASPECT);
 
   const image = (
     <Image
-      src={src}
+      src={LOGO_SRC}
       alt="MintCase"
       width={width}
       height={height}

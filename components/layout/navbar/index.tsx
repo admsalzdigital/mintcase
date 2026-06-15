@@ -27,7 +27,7 @@ export function Navbar() {
         </ul>
 
         <div className="absolute left-1/2 -translate-x-1/2">
-          <MintCaseLogo height={36} priority variant="wordmark" />
+          <MintCaseLogo height={36} priority />
         </div>
 
         <div className="ml-auto flex items-center gap-3 md:ml-0">

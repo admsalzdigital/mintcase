@@ -26,7 +26,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <MintCaseLogo height={28} variant="wordmark" />
+            <MintCaseLogo height={28} />
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-neutral-400">
               MintCase verändert, wie du Mint dabei hast. Diskret, praktisch und
               immer griffbereit.
