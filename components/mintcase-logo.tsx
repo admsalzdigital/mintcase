@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 
-const WORDMARK_ASPECT = 944 / 284;
+const WORDMARK_ASPECT = 1024 / 341;
 
 export function MintCaseLogo({
   className,
